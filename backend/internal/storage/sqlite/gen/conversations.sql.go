@@ -214,6 +214,7 @@ SET command_output = substr(command_output || ?1, 1, ?2),
     updated_at = ?3
 WHERE conversation_id = ?4
   AND provider_item_id = ?5
+  AND provider_item_id <> ''
   AND status <> 'cancelled'
   AND command_output_truncated = 0
 `
@@ -271,6 +272,7 @@ SET streamed_text = substr(streamed_text || ?1, 1, ?2),
     updated_at = ?3
 WHERE conversation_id = ?4
   AND provider_item_id = ?5
+  AND provider_item_id <> ''
   AND status <> 'cancelled'
   AND streamed_text_truncated = 0
 `
@@ -320,7 +322,7 @@ SET text = text || ?, revision = revision + 1,
         WHERE conversation_turns.id = conversation_messages.turn_id
           AND conversation_turns.state IN ('completed', 'recovered', 'interrupted', 'failed', 'cancelled')
     ), updated_at = ?
-WHERE conversation_messages.conversation_id = ? AND conversation_messages.provider_item_id = ?
+WHERE conversation_messages.conversation_id = ? AND conversation_messages.provider_item_id = ? AND conversation_messages.provider_item_id <> ''
 `
 
 type AppendConversationMessageDeltaParams struct {
@@ -650,6 +652,7 @@ SELECT EXISTS(
     FROM conversation_activities
     WHERE conversation_id = ?1
       AND provider_item_id = ?2
+      AND provider_item_id <> ''
       AND status <> 'cancelled'
 )
 `
@@ -2251,6 +2254,7 @@ SET status = 'resolved',
     updated_at = ?2
 WHERE conversation_id = ?3
   AND request_id = ?4
+  AND request_id <> ''
   AND status = 'pending'
 `
 
@@ -2570,7 +2574,7 @@ func (q *Queries) SelectConversationActivitiesPage(ctx context.Context, arg Sele
 
 const selectConversationActivityByProviderItem = `-- name: SelectConversationActivityByProviderItem :one
 SELECT id, conversation_id, turn_id, sequence, revision, kind, status, summary, detail_json, request_id, provider_item_id, created_at, updated_at, command_output, command_output_truncated, streamed_text, streamed_text_truncated, branch_id FROM conversation_activities
-WHERE conversation_id = ? AND provider_item_id = ?
+WHERE conversation_id = ? AND provider_item_id = ? AND provider_item_id <> ''
 LIMIT 1
 `
 
@@ -3007,6 +3011,7 @@ FROM conversation_activities
 WHERE conversation_id = ?
   AND kind = 'system'
   AND provider_item_id = ?
+  AND provider_item_id <> ''
 `
 
 type SelectConversationContextResetSequenceParams struct {
@@ -3323,7 +3328,7 @@ func (q *Queries) SelectConversationHumanPromptTurnIDs(ctx context.Context, conv
 
 const selectConversationMessageByClientID = `-- name: SelectConversationMessageByClientID :one
 SELECT id, conversation_id, turn_id, sequence, revision, role, origin, text, streaming, provider_item_id, client_message_id, created_at, updated_at, delivery_content_json, branch_id, client_payload_hash, sender_session_id, sender_project_id, sender_display_name, continuation, authored_by_user FROM conversation_messages
-WHERE conversation_id = ? AND client_message_id = ?
+WHERE conversation_id = ? AND client_message_id = ? AND client_message_id <> ''
 LIMIT 1
 `
 
@@ -3363,7 +3368,7 @@ func (q *Queries) SelectConversationMessageByClientID(ctx context.Context, arg S
 
 const selectConversationMessageByProviderItem = `-- name: SelectConversationMessageByProviderItem :one
 SELECT id, conversation_id, turn_id, sequence, revision, role, origin, text, streaming, provider_item_id, client_message_id, created_at, updated_at, delivery_content_json, branch_id, client_payload_hash, sender_session_id, sender_project_id, sender_display_name, continuation, authored_by_user FROM conversation_messages
-WHERE conversation_id = ? AND provider_item_id = ?
+WHERE conversation_id = ? AND provider_item_id = ? AND provider_item_id <> ''
 LIMIT 1
 `
 
@@ -3936,7 +3941,7 @@ func (q *Queries) SelectConversationTurnByID(ctx context.Context, id string) (Co
 
 const selectConversationTurnByProviderID = `-- name: SelectConversationTurnByProviderID :one
 SELECT id, conversation_id, handled_by_session_id, provider_turn_id, controller_generation, state, error_message, requested_at, started_at, completed_at, diff_json, rolled_back_at, plan_json, branch_id, promotion_started_at, promoted_to_turn_id, retry_of_turn_id, handled_by_review_id, usage_limit_resets_at, usage_limit_auto_resume, usage_limit_resume_error, batched_input, provider_input_text, failure_code, batch_delivery_kind, batch_delivery_steer_id FROM conversation_turns
-WHERE conversation_id = ? AND provider_turn_id = ?
+WHERE conversation_id = ? AND provider_turn_id = ? AND provider_turn_id <> ''
 LIMIT 1
 `
 
@@ -5122,7 +5127,7 @@ func (q *Queries) SetConversationTurnPlanSuperseded(ctx context.Context, arg Set
 const settleConversationActivity = `-- name: SettleConversationActivity :exec
 UPDATE conversation_activities
 SET status = ?, summary = ?, detail_json = ?, revision = revision + 1, updated_at = ?
-WHERE conversation_id = ? AND provider_item_id = ? AND status <> 'cancelled'
+WHERE conversation_id = ? AND provider_item_id = ? AND provider_item_id <> '' AND status <> 'cancelled'
 `
 
 type SettleConversationActivityParams struct {
@@ -5176,7 +5181,7 @@ func (q *Queries) SettleConversationActivityByRequest(ctx context.Context, arg S
 const settleConversationActivityStreamedText = `-- name: SettleConversationActivityStreamedText :execrows
 UPDATE conversation_activities
 SET streamed_text = ?, streamed_text_truncated = 0, revision = revision + 1, updated_at = ?
-WHERE conversation_id = ? AND provider_item_id = ? AND status <> 'cancelled'
+WHERE conversation_id = ? AND provider_item_id = ? AND provider_item_id <> '' AND status <> 'cancelled'
 `
 
 type SettleConversationActivityStreamedTextParams struct {
@@ -5211,7 +5216,7 @@ func (q *Queries) SettleConversationActivityStreamedText(ctx context.Context, ar
 const settleConversationMessage = `-- name: SettleConversationMessage :exec
 UPDATE conversation_messages
 SET text = ?, revision = revision + 1, streaming = 0, updated_at = ?
-WHERE conversation_id = ? AND provider_item_id = ?
+WHERE conversation_id = ? AND provider_item_id = ? AND provider_item_id <> ''
 `
 
 type SettleConversationMessageParams struct {
@@ -5539,7 +5544,7 @@ func (q *Queries) UpdateConversationThreadState(ctx context.Context, arg UpdateC
 const updateConversationTurnDiff = `-- name: UpdateConversationTurnDiff :execrows
 UPDATE conversation_turns
 SET diff_json = ?
-WHERE conversation_id = ? AND provider_turn_id = ?
+WHERE conversation_id = ? AND provider_turn_id = ? AND provider_turn_id <> ''
 `
 
 type UpdateConversationTurnDiffParams struct {
@@ -5564,7 +5569,7 @@ func (q *Queries) UpdateConversationTurnDiff(ctx context.Context, arg UpdateConv
 const updateConversationTurnPlan = `-- name: UpdateConversationTurnPlan :execrows
 UPDATE conversation_turns
 SET plan_json = ?
-WHERE conversation_id = ? AND provider_turn_id = ?
+WHERE conversation_id = ? AND provider_turn_id = ? AND provider_turn_id <> ''
 `
 
 type UpdateConversationTurnPlanParams struct {
