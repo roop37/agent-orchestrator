@@ -4128,5 +4128,17 @@
 	"teams.accessVia": "{{access}} · por {{team}}",
 	"teams.sharedToastViaTeam": "{{name}} compartilhou {{thing}} com {{team}}",
 	"teams.sharedToastWithYou": "{{name}} compartilhou {{thing}} com você",
-	"teams.open": "Abrir"
+	"teams.open": "Abrir",
+	"sessionFork.fork": "Bifurcar",
+	"sessionFork.tooltip": "Bifurcar esta sessão em uma nova",
+	"sessionFork.forking": "Bifurcando…",
+	"sessionFork.forkedFrom": "Bifurcada de {{title}}",
+	"sessionFork.unavailable": "As opções de bifurcação não estão disponíveis",
+	"sessionFork.failed": "Não foi possível bifurcar esta sessão",
+	"sessionFork.sectionTitle": "Bifurcações",
+	"sessionFork.originalPRs": "PRs do original",
+	"sessionFork.originalPR": "PR #{{number}} do original",
+	"sessionFork.forkSession": "Bifurcar sessão",
+	"sessionFork.textCopy": "Conversa copiada como texto",
+	"sessionFork.textCopyNotice": "Bifurcada de {{title}}. Este agente não consegue copiar a própria conversa, então recebeu a conversa do original como texto."
 }

@@ -36,6 +36,8 @@ export type MenuEntry =
 			/** An app shortcut's key hint, honouring custom keybindings. */
 			shortcutId?: AppShortcutId;
 			disabled?: boolean;
+			/** A muted line under the label, such as why the item is disabled. */
+			description?: string;
 			destructive?: boolean;
 			title?: string;
 			ariaLabel?: string;
@@ -161,7 +163,14 @@ export function MenuEntries({ entries }: { entries: MenuEntry[] }) {
 								title={entry.title}
 							>
 								{entry.icon}
-								{entry.label}
+								{entry.description ? (
+									<span className="flex min-w-0 flex-col">
+										<span>{entry.label}</span>
+										<span className="text-xs text-muted-foreground">{entry.description}</span>
+									</span>
+								) : (
+									entry.label
+								)}
 								{entry.shortcut ? <kit.Shortcut aria-hidden="true">{entry.shortcut}</kit.Shortcut> : null}
 								{!entry.shortcut && entry.shortcutId ? <AppShortcutHint id={entry.shortcutId} /> : null}
 							</kit.Item>

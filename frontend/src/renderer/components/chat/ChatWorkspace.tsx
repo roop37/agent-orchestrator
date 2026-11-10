@@ -1,4 +1,5 @@
 import { FileAnnotationContext } from "./FileAnnotationPreview";
+import { ForkableTurnContext, ForkTextCopyNotice } from "../SessionForkControls";
 import type { ChatFileReference, OpenFileAnnotation } from "../../../shared/chat-file-reference";
 import { TurnWorkSummary } from "./TurnWorkSummary";
 import { TurnSettleSnapshot } from "./TurnSettleSnapshot";
@@ -1952,7 +1953,7 @@ function ChatWorkspaceContent({
 						>
 							<ChatImageSourceProvider sessionId={snapshot.sessionId} assetBaseUrl={assetBaseUrl} remoteHost={Boolean(activeRemoteHostId)} artifacts={session?.artifactFiles}>
 							<ChatHostId.Provider value={activeRemoteHostId}>
-
+								{conversationEmpty ? <ForkTextCopyNotice /> : null}
 								<Timeline
 							onAddToSideChat={onAddToSideChat}
 									checkingSideChatAvailability={checkingSideChatAvailability}
@@ -3946,6 +3947,15 @@ export function Timeline({
 	const virtualRows = virtualizer.getVirtualItems();
 	const virtualHeight = virtualizer.getTotalSize();
 	renderedVirtualHeight.current = virtualHeight;
+	// Fork is offered on finished turns; the latest is marked because every
+	// agent can fork it, while older turns need one that cuts its copy.
+	const latestForkGroupKey = useMemo(() => {
+		for (let i = groups.length - 1; i >= 0; i--) {
+			const group = groups[i];
+			if (forkableGroup(group)) return group.key;
+		}
+		return undefined;
+	}, [groups]);
 	const renderedGroups = virtualized
 		? virtualRows.map((row) => ({ group: groups[row.index]!, row, index: row.index }))
 		: groups.map((group, index) => ({ group, row: undefined, index }));
@@ -4725,6 +4735,7 @@ export function Timeline({
 								data-chat-turn={group.key}
 							>
 								<WorkerUpdateIndexContext.Provider value={workerUpdateIndex}>
+								<ForkableTurnContext.Provider value={forkableGroup(group) ? { turnId: group.turnId as string, latest: group.key === latestForkGroupKey } : null}>
 								<TurnGroup
 									group={group}
 									harness={snapshot.harness}
@@ -4773,6 +4784,7 @@ export function Timeline({
 									busy={busy}
 									queued={Boolean(group.turnId && queued.has(group.turnId))}
 								/>
+								</ForkableTurnContext.Provider>
 								</WorkerUpdateIndexContext.Provider>
 							</div>
 						);
@@ -5700,6 +5712,13 @@ function useStableValue<T>(value: T): T {
 }
 
 /** A settling turn's rows from just before the fold, and the one at the top of the view. */
+// A turn a fork can copy: finished, not still running.
+function forkableGroup(group: TimelineGroup): boolean {
+	if (!group.turnId || group.live) return false;
+	const state = group.outcome?.state;
+	return state === "completed" || state === "recovered";
+}
+
 type SettleAnchor = {
 	turn: HTMLElement;
 	rows: HTMLElement[];

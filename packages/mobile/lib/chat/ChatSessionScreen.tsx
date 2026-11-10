@@ -1,4 +1,5 @@
 import { Stack, useNavigation, useRouter } from "expo-router";
+import * as Crypto from "expo-crypto";
 import { useHeaderHeight } from "expo-router/react-navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
@@ -19,7 +20,7 @@ import type { Theme } from "../theme";
 import { Frost, FROST_TAIL, frostStops } from "../frost";
 import { stackScreenOptions, SYSTEM_GLASS_HEADER } from "../stackScreenOptions";
 import { useTheme, useThemedStyles } from "../ThemeProvider";
-import { getWorkspacePaths, openSessionShell } from "./api";
+import { getWorkspacePaths, openSessionShell, forkSession, getForkOptions, type ForkOptions } from "./api";
 import { requestDockModel } from "./requestDockModel";
 import type { ResponseQuoteRequest } from "./responseQuotes";
 import { ChatComposer } from "./ChatComposer";
@@ -239,6 +240,23 @@ export function ChatSessionScreen({ session: boardSession }: { session: MobileCh
 	const reviewPromptPR = "projectName" in session ? undefined : sessionPRReadyForReview(session);
 	// Fetched only over the live connection; read through the last verified one
 	// too, so the card stays put while an app switch has the connection down.
+	// Session fork: offered when the daemon supports it.
+	const [forkOptions, setForkOptions] = useState<ForkOptions | null>(null);
+	const forkTurnCount = conversation.snapshot?.turns.length ?? 0;
+	const forkLatestState = conversation.snapshot?.turns.at(-1)?.state;
+	useEffect(() => {
+		if (!config) return;
+		let live = true;
+		getForkOptions(config, session.id)
+			.then((options) => { if (live) setForkOptions(options); })
+			.catch(() => { if (live) setForkOptions(null); });
+		return () => { live = false; };
+	}, [config, session.id, forkTurnCount, forkLatestState]);
+	const forkTurn = useCallback(async (turnId: string) => {
+		if (!config) return;
+		const fork = await forkSession(config, session.id, turnId, Crypto.randomUUID());
+		router.push({ pathname: "/session/[id]", params: { id: fork.sessionId, projectId: session.projectId, hostId: config.hostId } });
+	}, [config, router, session.id, session.projectId]);
 	const reviewSummaries = usePRSummaries(config && reviewPromptPR ? [{ config, sessionId: session.id }] : []);
 	const summaryConfig = useLastVerifiedConfig(config, machine);
 	const reviewPromptSummary = summaryConfig && reviewPromptPR ? reviewSummaries.summaryFor(summaryConfig, session.id, reviewPromptPR.number) : undefined;
@@ -714,6 +732,8 @@ export function ChatSessionScreen({ session: boardSession }: { session: MobileCh
 					onDecide={conversation.resolveApproval}
 					onResolveInput={conversation.resolveInput}
 					onRollback={conversation.rollback}
+					onFork={forkOptions?.allowed ? forkTurn : undefined}
+					forkAnyTurn={forkOptions?.anyTurn === true}
 					onEditMessage={conversation.editMessage}
 					onEditingChange={setEditingMessage}
 					jumpToSequence={jumpToSequence}

@@ -4209,5 +4209,17 @@
 	"teams.accessVia": "{{access}} · через {{team}}",
 	"teams.sharedToastViaTeam": "{{name}} открывает команде {{team}} доступ к «{{thing}}»",
 	"teams.sharedToastWithYou": "{{name}} открывает вам доступ к «{{thing}}»",
-	"teams.open": "Открыть"
+	"teams.open": "Открыть",
+	"sessionFork.fork": "Ответвить",
+	"sessionFork.tooltip": "Ответвить этот сеанс в новый",
+	"sessionFork.forking": "Ответвление…",
+	"sessionFork.forkedFrom": "Ответвлено от {{title}}",
+	"sessionFork.unavailable": "Параметры ответвления недоступны",
+	"sessionFork.failed": "Не удалось ответвить этот сеанс",
+	"sessionFork.sectionTitle": "Ответвления",
+	"sessionFork.originalPRs": "PR оригинала",
+	"sessionFork.originalPR": "PR #{{number}} оригинала",
+	"sessionFork.forkSession": "Ответвить сеанс",
+	"sessionFork.textCopy": "Разговор скопирован как текст",
+	"sessionFork.textCopyNotice": "Ответвление от {{title}}. Этот агент не умеет копировать собственный разговор, поэтому получил разговор оригинала в виде текста."
 }

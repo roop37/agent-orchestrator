@@ -4021,5 +4021,17 @@
 	"teams.accessVia": "{{access}} · via {{team}}",
 	"teams.sharedToastViaTeam": "{{name}} shared {{thing}} with {{team}}",
 	"teams.sharedToastWithYou": "{{name}} shared {{thing}} with you",
-	"teams.open": "Open"
+	"teams.open": "Open",
+	"sessionFork.fork": "Fork",
+	"sessionFork.tooltip": "Fork this session into a new one",
+	"sessionFork.forking": "Forking…",
+	"sessionFork.forkedFrom": "Forked from {{title}}",
+	"sessionFork.unavailable": "Fork options are unavailable",
+	"sessionFork.failed": "Couldn't fork this session",
+	"sessionFork.sectionTitle": "Forks",
+	"sessionFork.originalPRs": "Original's PRs",
+	"sessionFork.originalPR": "Original's PR #{{number}}",
+	"sessionFork.forkSession": "Fork session",
+	"sessionFork.textCopy": "Conversation copied as text",
+	"sessionFork.textCopyNotice": "Forked from {{title}}. This agent can't copy its own conversation, so it was given the original's conversation as text."
 }

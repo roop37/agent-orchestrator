@@ -36,6 +36,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import { CueRunMenu } from "./chat/CueRunMenu";
 import { captureTopbarAction } from "../lib/topbar-telemetry";
 import { SessionOwnerTag } from "./SessionOwnerTag";
+import { SessionForkControls } from "./SessionForkControls";
 
 // The action cluster a session's tab strip hosts: open-in-editor, cues, and
 // the orchestrator / board / new-task launchers. The page frame itself is
@@ -442,6 +443,10 @@ function LegacySessionTopbarActions({
 						disabled={!sessionCueTargetAvailable(session)}
 					/>
 				</span>
+			) : null}
+			{/* Experimental fork; renders nothing outside developer mode. */}
+			{session && !isOrchestrator && !session.cloud && !session.isTerminated ? (
+				<SessionForkControls key={`fork-${session.id}`} session={session} />
 			) : null}
 			{/* Local worker actions share one tight control group. Navigation
 			    remains a separate visual target in the outer top-bar row. */}
