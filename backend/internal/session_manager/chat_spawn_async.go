@@ -447,7 +447,7 @@ func provisionPlan(in asyncChatSpawn, reusePublishedWorkspace bool) []domain.Ses
 }
 
 func (m *Manager) logAsyncChatSpawnStage(id domain.SessionID, stage string, started time.Time) {
-	m.logger.Info("spawn: asynchronous chat stage",
+	m.logger.Info("spawn: asynchronous start stage",
 		"sessionID", id,
 		"stage", stage,
 		"duration", time.Since(started),
@@ -456,7 +456,7 @@ func (m *Manager) logAsyncChatSpawnStage(id domain.SessionID, stage string, star
 
 // failAsyncChatSpawn preserves the visible row and queue for retry.
 func (m *Manager) failAsyncChatSpawn(ctx context.Context, id domain.SessionID, cause error) {
-	m.logger.Error("spawn: asynchronous chat start failed", "sessionID", id, "error", cause)
+	m.logger.Error("spawn: asynchronous start failed", "sessionID", id, "error", cause)
 	cleanupCtx, cancel := spawnRollbackContext(ctx)
 	defer cancel()
 	// The 201 has already gone out, so the request logger never sees this.
